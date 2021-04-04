@@ -6,7 +6,6 @@ const BLACK_MARKER: &str = "*";
 const BOARD_HEADER: &str = "    A  B  C  D  E  F  G  H    ";
 
 pub fn board_to_string(board: &Board, perspective: Color) -> String {
-
     let (iter_order, actual_header) = if perspective == Color::White {
         (vec![7, 6, 5, 4, 3, 2, 1, 0], String::from(BOARD_HEADER))
     } else {
