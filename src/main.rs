@@ -2,6 +2,7 @@ use clap::{Arg, App};
 use chess::{Color};
 mod game_logic;
 mod game_printer;
+mod engine;
 
 fn main() {
     let matches = App::new("AI Chess Project")

@@ -1,19 +1,23 @@
 use chess::{Game, Color, ChessMove, GameResult};
 use std::io::{self, BufRead};
 use crate::game_printer::board_to_string;
+use crate::engine::Engine;
 
 pub struct GameLogic {
     game_state: Game,
     engine_color: Option<Color>,
+    engine: Engine,
 }
 
 impl GameLogic {
     pub fn new(engine_color: Option<Color>) -> GameLogic {
         GameLogic {
             game_state: Game::new(),
-            engine_color: engine_color, 
+            engine_color: engine_color,
+            engine: Engine::new(Game::new()),
         }
     }
+
     pub fn start(&mut self) {
         while self.game_state.result().is_none() {
             let to_move = self.game_state.side_to_move();
@@ -27,13 +31,17 @@ impl GameLogic {
                 stdin.lock().read_line(&mut raw_move).expect("Could not read move");
                 let maybe_move = ChessMove::from_san(&position, &raw_move);
                 if maybe_move.is_ok() {
-                    self.game_state.make_move(maybe_move.unwrap());
+                    let actual_move = maybe_move.unwrap();
+                    self.game_state.make_move(actual_move);
+                    self.engine.play_move(actual_move);
                 } else {
                     print!("Given invalid move\n");
                 }
             } else {
-                print!("Engine made the move: ...\n");
-                break;
+                let engine_move = self.engine.get_best_move();
+                if engine_move.is_none() { break; }
+                self.game_state.make_move(engine_move.unwrap());
+                self.engine.play_move(engine_move.unwrap());
             }
         }
 
