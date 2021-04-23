@@ -47,7 +47,7 @@ pub fn piece_to_string(piece: Piece, color: Color) -> String {
     return [base, marker].join("");
 }
 
-fn to_square(row: i32, col: i32) -> Square {
+pub fn to_square(row: i32, col: i32) -> Square {
     return Square::make_square(make_rank(row), make_file(col));
 }
 
