@@ -33,7 +33,7 @@ impl Engine {
 
     pub fn get_best_move(&self) -> Option<ChessMove> {
         let move_and_value = MoveGen::new_legal(&self.game_state.current_position())
-            .map(|a_move| (a_move, minimax(self.game_state.current_position().make_move_new(a_move), 2, true)));
+            .map(|a_move| (a_move, alphabeta(self.game_state.current_position().make_move_new(a_move), 3, MIN_VAL, MAX_VAL, true)));
         let mut best_move = (Option::None, -1);
         for (chess_move, value) in move_and_value {
             if value > best_move.1 { best_move = (Option::Some(chess_move), value) }
@@ -61,6 +61,36 @@ fn minimax(position: Board, depth: i32, maximizing_player: bool) -> i32 {
         for child in children {
             let new_position = position.make_move_new(child);
             value = std::cmp::min(value, minimax(new_position, depth - 1, true));
+        }
+        return value;
+    }
+}
+
+fn alphabeta(position: Board, depth: i32, alpha: i32, beta: i32, maximizing_player: bool) -> i32 {
+    if depth == 0 || position.status() != BoardStatus::Ongoing {
+        return heuristic(position);
+    }
+    let mut new_alpha = alpha;
+    let mut new_beta = beta;
+    if maximizing_player {
+        let mut value = MIN_VAL;
+        let children = MoveGen::new_legal(&position);
+        for child in children {
+            let new_position = position.make_move_new(child);
+            value = std::cmp::max(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, false));
+            new_alpha = std::cmp::max(new_alpha, value);
+            if new_alpha >= beta { break; }
+        }
+        return value;
+    }
+    else {
+        let mut value = MAX_VAL;
+        let children = MoveGen::new_legal(&position);
+        for child in children {
+            let new_position = position.make_move_new(child);
+            value = std::cmp::min(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, true));
+            new_beta = std::cmp::min(new_beta, value);
+            if new_beta <= new_alpha { break; }
         }
         return value;
     }
