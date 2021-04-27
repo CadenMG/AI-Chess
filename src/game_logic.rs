@@ -12,9 +12,7 @@ pub struct GameLogic {
 
 impl GameLogic {
     pub fn new(engine_color: Option<Color>, depth: i32, fen: String, algo: String) -> GameLogic {
-        println!("{}", &*fen);
         let game = Game::new_from_fen(&*(fen)).unwrap_or(Game::new());
-        print!("{}", board_to_string(&game.current_position(), game.side_to_move()));
         GameLogic {
             game_state: game.clone(),
             engine_color: engine_color,
