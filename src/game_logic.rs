@@ -3,6 +3,8 @@ use std::io::{self, BufRead};
 use crate::game_printer::board_to_string;
 use crate::engine::Engine;
 
+const DEPTH: i32 = 3;
+
 pub struct GameLogic {
     game_state: Game,
     engine_color: Option<Color>,
@@ -10,11 +12,12 @@ pub struct GameLogic {
 }
 
 impl GameLogic {
-    pub fn new(engine_color: Option<Color>) -> GameLogic {
+    pub fn new(engine_color: Option<Color>, depth: Option<i32>, fen: Option<String>, algo: Option<String>) -> GameLogic {
         GameLogic {
             game_state: Game::new(),
             engine_color: engine_color,
-            engine: Engine::new(Game::new()),
+            engine: Engine::new(if fen.is_none() {Game::new()} else {Game::new_from_fen(fen.unwrap())},
+            depth.unwrap_or(DEPTH), algo.unwrap_or(""))
         }
     }
 

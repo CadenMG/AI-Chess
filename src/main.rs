@@ -16,6 +16,21 @@ fn main() {
                  .long("type")
                  .takes_value(true)
                  .help("Type of Chess game you want to play"))
+        .arg(Arg::with_name("depth")
+                 .short("d")
+                 .long("depth")
+                 .takes_value(true)
+                 .help("Depth you want to analyze")
+        .arg(Arg::with_name("fen")
+                 .short("p")
+                 .long("fen")
+                 .takes_value(true)
+                 .help("FEN of the position you want to analyze")
+        .arg(Arg::with_name("algo")
+                 .short("a")
+                 .long("algo")
+                 .takes_value(true)
+                 .help("Algorithm for AI to use")
         .get_matches();
 
     let color = matches.value_of("color").unwrap_or("W").to_ascii_uppercase();
@@ -29,6 +44,6 @@ fn main() {
         Option::Some(Color::White)
     };
 
-    let mut game = game_logic::GameLogic::new(engine_color);
+    let mut game = game_logic::GameLogic::new(engine_color, matches.value_of("depth"), matches.value_of("fen"), matches.value_of("algo"));
     game.start();
 }

@@ -1,9 +1,21 @@
 use chess::{Game, Piece, Color, ChessMove, MoveGen, Board, BoardStatus};
 use crate::game_printer::to_square;
 use rand::prelude::*;
+use std::time::{Duration, Instant};
 
 const MAX_VAL: i32 = 1001;
 const MIN_VAL: i32 = -1001;
+
+fn get_algo(algo: String) -> fn(Board, i32, bool) -> i32 {
+    return match algo {
+        String::from("m") => minimax,
+        String::from("ab") => alphabetahelper,
+        String::from("bf") => bestfirst,
+        String::from("bs") => bstar,
+        _ => alphabetahelper
+    }
+
+}
 
 fn get_piece_weight(piece: Piece) -> i32 {
     let weight = match piece {
@@ -19,12 +31,15 @@ fn get_piece_weight(piece: Piece) -> i32 {
 
 pub struct Engine {
     game_state: Game,
+    depth: i32,
+    algo: String
 }
-
 impl Engine {
-    pub fn new(game_state: Game) -> Engine {
+    pub fn new(game_state: Game, depth: i32, algo: String) -> Engine {
         Engine {
             game_state,
+            depth,
+            algo
         }
     }
 
@@ -33,12 +48,14 @@ impl Engine {
     }
 
     pub fn get_best_move(&self) -> Option<ChessMove> {
+        let now = Instant::now();
         let move_and_value = MoveGen::new_legal(&self.game_state.current_position())
-            .map(|a_move| (a_move, bstar(self.game_state.current_position().make_move_new(a_move), 3, true)));
+            .map(|a_move| (a_move, bstar(self.game_state.current_position().make_move_new(a_move), self.depth, true)));
         let mut best_move = (Option::None, MIN_VAL);
         for (chess_move, value) in move_and_value {
             if value > best_move.1 { best_move = (Option::Some(chess_move), value) }
         }
+        println!("Time for move {}", now.elapsed().as_secs());
         return best_move.0;
     }
 }
@@ -65,6 +82,11 @@ fn minimax(position: Board, depth: i32, maximizing_player: bool) -> i32 {
         }
         return value;
     }
+}
+
+
+fn alphabetahelper(position: Board, depth: i32, maximizing_player: bool) -> i32 {
+    return alphabeta(position, depth, MIN_VAL, MAX_VAL, maximizing_player);
 }
 
 fn alphabeta(position: Board, depth: i32, alpha: i32, beta: i32, maximizing_player: bool) -> i32 {
