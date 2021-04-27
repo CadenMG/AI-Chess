@@ -51,7 +51,7 @@ impl Engine {
     pub fn get_best_move(&self) -> Option<ChessMove> {
         let now = Instant::now();
         let move_and_value = MoveGen::new_legal(&self.game_state.current_position())
-            .map(|a_move| (a_move, bstar(self.game_state.current_position().make_move_new(a_move), self.depth, true)));
+            .map(|a_move| (a_move, get_algo(self.algo.clone())(self.game_state.current_position().make_move_new(a_move), self.depth, true)));
         let mut best_move = (Option::None, MIN_VAL);
         for (chess_move, value) in move_and_value {
             if value > best_move.1 { best_move = (Option::Some(chess_move), value) }
@@ -121,6 +121,9 @@ fn alphabeta(position: Board, depth: i32, alpha: i32, beta: i32, maximizing_play
 }
 
 fn bestfirst(position: Board, depth: i32, maximizing_player: bool) -> i32 {
+    if depth == 0 || position.status() != BoardStatus::Ongoing {
+        return heuristic(position);
+    }
     let moves: Vec<ChessMove> = MoveGen::new_legal(&position).collect();
     let mut moves_and_values: Vec<(ChessMove, i32)> = Vec::new();
     for mv in moves{
@@ -128,11 +131,28 @@ fn bestfirst(position: Board, depth: i32, maximizing_player: bool) -> i32 {
     }
     moves_and_values.sort_by(|a, b| a.1.cmp(&b.1));
 
-    let mut best_move = (Option::None, MIN_VAL);
-    for (chess_move, value) in moves_and_values {
-        if value > best_move.1 { best_move = (Option::Some(chess_move), alphabeta(position.make_move_new(chess_move), depth, MIN_VAL,MAX_VAL, maximizing_player)) }
+    let mut new_alpha = MIN_VAL;
+    let mut new_beta = MAX_VAL;
+    if maximizing_player {
+        let mut value = MIN_VAL;
+        for (mv, val) in moves_and_values {
+            let new_position = position.make_move_new(mv);
+            value = std::cmp::max(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, false));
+            new_alpha = std::cmp::max(new_alpha, value);
+            if new_alpha >= new_beta { break; }
+        }
+        return value;
     }
-    return best_move.1;
+    else {
+        let mut value = MAX_VAL;
+        for (mv, val) in moves_and_values {
+            let new_position = position.make_move_new(mv);
+            value = std::cmp::min(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, true));
+            new_beta = std::cmp::min(new_beta, value);
+            if new_beta <= new_alpha { break; }
+        }
+        return value;
+    }
 }
 
 fn bstar(position: Board, depth: i32, maximizing_player: bool) -> i32 {
@@ -151,11 +171,28 @@ fn bstar(position: Board, depth: i32, maximizing_player: bool) -> i32 {
 
     moves_and_values.sort_by(|a, b| a.1.cmp(&b.1));
 
-    let mut best_move = (Option::None, MIN_VAL);
-    for (chess_move, value) in moves_and_values {
-        if value > best_move.1 { best_move = (Option::Some(chess_move), alphabeta(position.make_move_new(chess_move), depth, MIN_VAL,MAX_VAL, maximizing_player)) }
+    let mut new_alpha = MIN_VAL;
+    let mut new_beta = MAX_VAL;
+    if maximizing_player {
+        let mut value = MIN_VAL;
+        for (mv, val) in moves_and_values {
+            let new_position = position.make_move_new(mv);
+            value = std::cmp::max(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, false));
+            new_alpha = std::cmp::max(new_alpha, value);
+            if new_alpha >= new_beta { break; }
+        }
+        return value;
     }
-    return best_move.1;
+    else {
+        let mut value = MAX_VAL;
+        for (mv, val) in moves_and_values {
+            let new_position = position.make_move_new(mv);
+            value = std::cmp::min(value, alphabeta(new_position, depth - 1, new_alpha, new_beta, true));
+            new_beta = std::cmp::min(new_beta, value);
+            if new_beta <= new_alpha { break; }
+        }
+        return value;
+    }
 }
 
 
