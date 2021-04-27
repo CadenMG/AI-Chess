@@ -4,6 +4,8 @@ mod game_logic;
 mod game_printer;
 mod engine;
 
+const DEPTH: i32 = 3;
+
 fn main() {
     let matches = App::new("AI Chess Project")
         .arg(Arg::with_name("color")
@@ -20,17 +22,17 @@ fn main() {
                  .short("d")
                  .long("depth")
                  .takes_value(true)
-                 .help("Depth you want to analyze")
+                 .help("Depth you want to analyzeA"))
         .arg(Arg::with_name("fen")
                  .short("p")
                  .long("fen")
                  .takes_value(true)
-                 .help("FEN of the position you want to analyze")
+                 .help("FEN of the position you want to analyze"))
         .arg(Arg::with_name("algo")
                  .short("a")
                  .long("algo")
                  .takes_value(true)
-                 .help("Algorithm for AI to use")
+                 .help("Algorithm for AI to use"))
         .get_matches();
 
     let color = matches.value_of("color").unwrap_or("W").to_ascii_uppercase();
@@ -43,7 +45,7 @@ fn main() {
     } else {
         Option::Some(Color::White)
     };
-
-    let mut game = game_logic::GameLogic::new(engine_color, matches.value_of("depth"), matches.value_of("fen"), matches.value_of("algo"));
+    let depth:i32 = matches.value_of("depth").unwrap_or(&*(DEPTH.to_string())).parse::<i32>().unwrap();
+    let mut game = game_logic::GameLogic::new(engine_color, depth, matches.value_of("fen").unwrap_or("").to_string(), matches.value_of("algo").unwrap_or("").to_string());
     game.start();
 }

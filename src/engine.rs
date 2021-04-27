@@ -7,11 +7,12 @@ const MAX_VAL: i32 = 1001;
 const MIN_VAL: i32 = -1001;
 
 fn get_algo(algo: String) -> fn(Board, i32, bool) -> i32 {
-    return match algo {
-        String::from("m") => minimax,
-        String::from("ab") => alphabetahelper,
-        String::from("bf") => bestfirst,
-        String::from("bs") => bstar,
+    let stralgo = &*algo;
+    return match stralgo {
+        "m" => minimax,
+        "ab" => alphabetahelper,
+        "bf" => bestfirst,
+        "bs" => bstar,
         _ => alphabetahelper
     }
 
