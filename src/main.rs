@@ -24,10 +24,11 @@ fn main() {
                  .takes_value(true)
                  .help("Depth you want to analyzeA"))
         .arg(Arg::with_name("fen")
-                 .short("p")
+                 .short("f")
                  .long("fen")
                  .takes_value(true)
-                 .help("FEN of the position you want to analyze"))
+                 .help("FEN of the position you want to analyze")
+                 .multiple(true))
         .arg(Arg::with_name("algo")
                  .short("a")
                  .long("algo")
@@ -46,6 +47,6 @@ fn main() {
         Option::Some(Color::White)
     };
     let depth:i32 = matches.value_of("depth").unwrap_or(&*(DEPTH.to_string())).parse::<i32>().unwrap();
-    let mut game = game_logic::GameLogic::new(engine_color, depth, matches.value_of("fen").unwrap_or("").to_string(), matches.value_of("algo").unwrap_or("").to_string());
+    let mut game = game_logic::GameLogic::new(engine_color, depth, matches.values_of("fen").unwrap().collect::<Vec<&str>>().join(" ").to_string(), matches.value_of("algo").unwrap_or("").to_string());
     game.start();
 }

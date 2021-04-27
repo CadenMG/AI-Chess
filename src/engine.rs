@@ -56,7 +56,7 @@ impl Engine {
         for (chess_move, value) in move_and_value {
             if value > best_move.1 { best_move = (Option::Some(chess_move), value) }
         }
-        println!("Time for move {}", now.elapsed().as_secs());
+        println!("Time for move {}", now.elapsed().as_millis());
         return best_move.0;
     }
 }
